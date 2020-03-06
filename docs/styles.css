@@ -1,0 +1,453 @@
+/* Body */
+
+body {
+    display: flex;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.background {
+    background: linear-gradient(to bottom, #38a2ff, white);
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    z-index: -10;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.white {
+    color: white;
+}
+
+.html {
+     font-family: 'PT Sans', sans-serif;
+}
+
+/*Global design settings*/
+
+.app-content {
+    min-height: 100vh;
+    flex: 1;
+}
+
+/*Pure override*/
+
+.pure-button.pure-button-primary {
+    background-color: #38a2ff;
+    color: white;
+}
+
+/* App component */
+
+.app-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-header {
+    width: inherit;
+    background-color: white;
+    height: 80px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+}
+
+.app-logo-container {
+    font-size: 1.5em;
+    background-color: #38a2ff;
+    height: 100%;
+    color: white;
+    padding-left: 20px;
+    padding-right: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+}
+
+.logo-container {
+	height: inherit;
+}
+
+.logo {
+	height: inherit;
+}
+
+.app-main-content {
+    flex: 1;
+    display: flex;
+    padding: 40px;
+}
+
+.management-panel {
+    background-color: white;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+}
+
+
+.management-panel-content {
+    flex: 1;
+    background-color: #f7f7f7;
+    padding-left: 2%;
+    padding-right: 2%;
+    display: flex;
+}
+
+.management-panel-menu-bar {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-color: #f7f7f7;
+}
+
+.management-panel-menu-item {
+    height: 60px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px;
+    align-items: center;
+    color: gray;
+    cursor: pointer;
+    user-select: none;
+    background-color: white;
+    text-decoration: none;
+}
+
+.management-panel-menu-item:hover {
+    color: black;
+    background-color: #666;
+}
+
+.management-panel-menu-item.active {
+    color: white;
+    background-color: #38a2ff;
+}
+
+@media screen and (max-width: 600px) {
+  .app-main-content {
+        flex: 1;
+        display: flex;
+        padding: 5px;
+    }
+
+    .management-panel {
+        flex-direction: column;
+    }
+
+  .management-panel-menu-bar {
+    width: 100%;
+    height: 100px;
+    flex-direction: row;
+  }
+
+  .management-panel-menu-item {
+    flex-direction: column;
+    flex: 1;
+  }
+
+}
+
+.hidden-input {
+    display: none;
+}
+
+.transactions-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9em;
+}
+
+.transaction-list-controls-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.transaction-list-controls {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    margin-left: 2%;
+    margin-right: 2%;
+}
+
+input[type=range] {
+    width: 165px;
+}
+
+ .transaction-control-button {
+    max-width: 250px;
+    margin-bottom: 5px;
+ }
+
+.filter-control {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 30px;
+}
+
+.pure-menu-link:hover {
+    cursor: pointer;
+}
+
+.pure-menu-selected {
+    color: black !important;
+    background: lightgray;
+}
+
+.transaction-list {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.transaction-row {
+    height: auto;
+    border: 1px solid #c6c6c6;
+    background: white;
+    display: flex;
+    font-size: 0.9em;
+    box-shadow: 2px 2px 5px 0px #d1d1d1;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    padding: 5px;
+    position: relative;
+}
+
+.delete-control {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    z-index: 10;
+}
+
+.delete-icon {
+    padding: 1px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+} 
+
+.delete-icon:hover {
+    background-color: #38a2ff;
+    cursor: pointer;
+}
+
+.confirm-delete-container {
+    background-color: white;
+    padding: 5px;
+    border: 2px solid #38a2ff;
+}
+
+.transaction-data-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.transaction-category-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 200px;
+}
+
+.category-editor {
+    flex: 1;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.category-name {
+    height: 30px;
+    display: flex;
+    width: 100%;
+    font-weight: 600;
+    font-size: 1.2em;
+    justify-content: center;
+    align-items: center;
+}
+
+.category-editor-button-spacer {
+    height: 5px;
+}
+
+.category-editor-control {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.transaction-data-head {
+    display: flex;
+    padding-right: 10px;
+    justify-content: space-between;
+    min-height: 40px;
+    align-items: center;
+    background-color: #DCDCDC;
+}
+
+.transaction-data-head-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.transaction-data-body {
+    flex: 1;
+    display: flex;
+    min-height: 40px;
+    border: 1px solid #DCDCDC;
+    padding-top: 2px;
+}
+
+.transaction-data-body-item {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    flex-direction: row;
+    align-items: flex-start;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.transaction-data-body-label {
+    margin-right: 10px;
+}
+
+.transaction-text {
+    text-overflow: ellipsis;
+}
+
+.transaction-text.negative {
+    color: red;
+}
+
+.more-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 10px; 
+    padding-bottom: 20px;
+}
+
+@media screen and (max-width: 800px) {
+
+    .transaction-row {
+        flex-direction: column;
+    }
+
+    .transaction-data-body {
+        flex-direction: column;
+    }
+
+    .transaction-category-container {
+        margin-top: 5px;
+        align-items: flex-start;
+        width: 100%;
+    }
+}
+
+.reports-list-controls {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.interest-rate-slider {
+    display: flex;
+    width: 165px;
+}
+
+.rate-display {
+    margin-left: 5px;
+}
+
+.reports-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.9em;
+}
+
+.chart-container {
+    height: 300px;
+    border: 1px solid #c6c6c6;
+    background: white;
+    box-shadow: 2px 2px 5px 0px #d1d1d1;
+    margin-bottom: 10px;
+    padding: 5px;
+    position: relative;
+    flex: 1;
+}
+
+.chart-container.double {
+    height: 600px;
+}
+
+.stat-container {
+    min-height: 100px;
+    border: 1px solid #c6c6c6;
+    background: white;
+    box-shadow: 2px 2px 5px 0px #d1d1d1;
+    margin-bottom: 10px;
+    padding: 5px;
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.stat-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-width: 250px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-weight: 700;
+    font-size: 2em;
+    color: black;
+}
