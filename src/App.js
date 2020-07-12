@@ -35,8 +35,12 @@ function App(props) {
   const [predict, setPredict] = useState(null);
 
   useEffect(() => {
-    const newState = retrieveStateFromLocalStorage();
-    setState(newState);
+    try {
+      const newState = retrieveStateFromLocalStorage();
+      setState(newState);
+    } catch (e) {
+      console.log("Error applying state from local storage to running application ", e.message);
+    }
     createPredictiveModel(state.transactions);
     // eslint-disable-next-line
   }, []);
@@ -108,37 +112,56 @@ function App(props) {
 
   // Get state from local storage if it exists or instantiate with empty defaults
   function retrieveStateFromLocalStorage() {
-    const savedState = window.localStorage.getItem("savedState");
-    const parsedSavedState = savedState ? JSON.parse(savedState) : {};
-    const newState = {
-        ...state,
-        transactions: (savedState ? parsedSavedState.transactions : []),
-        currentBalance: (savedState ? parsedSavedState.currentBalance : ""),
-        otherSavingsBalance: (savedState ? parsedSavedState.otherSavingsBalance : ""),
-        savingGoal: (savedState ? parsedSavedState.savingGoal : ""),
-        interestRate: (savedState ? parsedSavedState.interestRate : "0"),
-        storedCategoryMappings: (savedState ? new Map(parsedSavedState.storedCategoryMappings) : new Map())
+    try {
+      const savedState = window.localStorage.getItem("savedState");
+      const parsedSavedState = savedState ? JSON.parse(savedState) : {};
+      const newState = {
+          ...state,
+          transactions: (savedState ? parsedSavedState.transactions : []),
+          currentBalance: (savedState ? parsedSavedState.currentBalance : ""),
+          otherSavingsBalance: (savedState ? parsedSavedState.otherSavingsBalance : ""),
+          savingGoal: (savedState ? parsedSavedState.savingGoal : ""),
+          interestRate: (savedState ? parsedSavedState.interestRate : "0"),
+          storedCategoryMappings: (savedState ? new Map(parsedSavedState.storedCategoryMappings) : new Map())
+      }
+      return newState;
+    } catch (e) {
+      console.log("Error retrieving from local storage", e.message);
     }
-    return newState;
   }
 
   // Save state in React state and local storage at same time
   function setStateWithPersistence(newState) {
-    setState(newState);
-    saveStateToLocalStorage(newState);
+    try {
+      setState(newState);
+    } catch (e) {
+      console.log("Error saving state", e.message);
+      return;
+    }
+    try {
+      saveStateToLocalStorage(newState);
+    } catch(e) {
+        console.log("Error saving to local storage", e.message)
+        return;
+    }
+    
   }
 
   // Save state to local storage
   function saveStateToLocalStorage(appState) {
-    const saveState = {
-        transactions: appState.transactions, 
-        currentBalance: appState.currentBalance,
-        otherSavingsBalance: appState.otherSavingsBalance,
-        savingGoal: appState.savingGoal,
-        interestRate: appState.interestRate,
-        storedCategoryMappings: Array.from(appState.storedCategoryMappings.entries())
-      }
-    window.localStorage.setItem("savedState", JSON.stringify(saveState));
+    try {
+      const saveState = {
+          transactions: appState.transactions, 
+          currentBalance: appState.currentBalance,
+          otherSavingsBalance: appState.otherSavingsBalance,
+          savingGoal: appState.savingGoal,
+          interestRate: appState.interestRate,
+          storedCategoryMappings: Array.from(appState.storedCategoryMappings.entries())
+        }
+      window.localStorage.setItem("savedState", JSON.stringify(saveState));
+    } catch (e) {
+      console.log("Error saving state to local storage", e.message);
+    }
   }
 
   // update the app route
@@ -148,79 +171,110 @@ function App(props) {
 
   // process an imported csv file with transaction data ()
   function importTransactions(url) {
-    d3.csv(url).then((result) => {
-        const processedTransactions = processTransactionArray(result);
-        const categorisedTransactions = mapCategoriesToTransactions(state.storedCategoryMappings, processedTransactions)
-        const newState = {...state, transactions: categorisedTransactions}
-        setStateWithPersistence(newState);
-        createPredictiveModel(categorisedTransactions);
-    });
+    try {
+      d3.csv(url).then((result) => {
+          const processedTransactions = processTransactionArray(result);
+          const categorisedTransactions = mapCategoriesToTransactions(state.storedCategoryMappings, processedTransactions)
+          const newState = {...state, transactions: categorisedTransactions}
+          setStateWithPersistence(newState);
+          createPredictiveModel(categorisedTransactions);
+      });
+    } catch(e) {
+      console.log("Transaction import failed" + e.message);
+    }
   }
 
   // Reset the transactions and filter state
   function clearTransactions() {
-
-    const newState = {
-        ...state, 
-        transactions: [],
-        currentBalance: "",
-        otherSavingsBalance: "",
-        savingGoal: "",
-        storedCategoryMappings: new Map()
+    try {
+      const newState = {
+          ...state, 
+          transactions: [],
+          currentBalance: "",
+          otherSavingsBalance: "",
+          savingGoal: "",
+          storedCategoryMappings: new Map()
+      }
+      setStateWithPersistence(newState);
+      resetFilterState();
+      setPredict(null);
+    } catch (e) {
+      console.log("Error clearing transactions", e.message);
     }
-    setStateWithPersistence(newState);
-    resetFilterState();
-    setPredict(null);
   }
 
   // Remove a transaction from the list
   function deleteTransaction(transactionId) {
-    const newTransactions = state.transactions.filter((transaction) => {
-      return transaction.id !== transactionId
-    });
-    const newState = {...state, transactions: newTransactions}
-    setStateWithPersistence(newState);
+    try {
+      const newTransactions = state.transactions.filter((transaction) => {
+        return transaction.id !== transactionId
+      });
+      const newState = {...state, transactions: newTransactions}
+      setStateWithPersistence(newState);
+    } catch (e) {
+      console.log("Error deleting transaction", e.message);
+    }
   }
 
   // Generate a downloadable file with the mappings from transaction details to category
   function generateCategoryMapping() {
-    const export_data = "data:text/json," + encodeURIComponent(JSON.stringify(Array.from(generateCategoryMappingFromTransactionArray(state.transactions).entries())));
-    const export_time = new Date().toLocaleString();
-    const downloadFileName = "data " + export_time + ".json";
-    const aLink = downloadMappingRef.current;
-    aLink.href = export_data;
-    aLink.download = downloadFileName;
-    aLink.click();
+    try {
+      const export_data = "data:text/json," + encodeURIComponent(JSON.stringify(Array.from(generateCategoryMappingFromTransactionArray(state.transactions).entries())));
+      const export_time = new Date().toLocaleString();
+      const downloadFileName = "data " + export_time + ".json";
+      const aLink = downloadMappingRef.current;
+      aLink.href = export_data;
+      aLink.download = downloadFileName;
+      aLink.click();
+    } catch (e) {
+      console.log("Error generating category download file: ", e.message);
+    }
   }
 
   // Read an uploaded category mapping file and apply the categories to all matching transactions
   function importCategoryMappings(file) {
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
-      try {
         const result = JSON.parse(fileReader.result);
         const categoryMap = new Map(result);
         applyCategoryMappingsToTransactions(categoryMap);
-      } catch (e) {
-        console.log(e);
-      }
     }
-    fileReader.readAsText(file);
+    try {
+      fileReader.readAsText(file);
+    } catch (e) {
+      console.log("Error reading file: ", e.message);
+    }
   }
 
   // Apply categories to matching transactions
   function applyCategoryMappingsToTransactions(categoryMap) {
-    const newTransactions = state.transactions.map((transaction) => {
-      if (categoryMap.get(transaction.referenceString)) {
-        return {...transaction, category: categoryMap.get(transaction.referenceString)}
+    if(categoryMap) {
+      try {
+        const newTransactions = state.transactions?.map((transaction) => {
+          if (categoryMap.get(transaction.referenceString)) {
+            return {...transaction, category: categoryMap.get(transaction.referenceString)}
+          }
+          else {
+            return transaction;
+          }
+        });
+        if (newTransactions) {
+          const newState = {...state, transactions: newTransactions}
+          setStateWithPersistence(newState);
+          createPredictiveModel(newTransactions);
+        }
+        else {
+          throw new Error("transactions were undefined");
+        }
+      } catch (e) {
+        console.log("Error applying category mappings", e.message);
+        return;
       }
-      else {
-        return {...transaction, transactions: newTransactions, storedCategoryMappings: categoryMap};
-      }
-    });
-    const newState = {...state, transactions: newTransactions}
-    setStateWithPersistence(newState);
-    createPredictiveModel(newTransactions);
+      
+    }
+    else {
+      console.log("no category map found!")
+    }
   }
 
   /*
@@ -272,7 +326,7 @@ function App(props) {
   }
 
   function updateCategoryForMatchingItems(transactionId, category) {
-    const transaction = state.transactions.find((t) => {
+    const transaction = state.transactions?.find((t) => {
       return t.id === transactionId;
     });
 
