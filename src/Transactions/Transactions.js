@@ -7,7 +7,7 @@ function Transactions (props) {
 
   const uploadFileRef = useRef(null);
   const categoryList = generateCategoryListDynamically({transactions: props.transactions});
-  const filteredTransactions = filterTransactions({transactions: props.transactions, filterClassified: props.filterClassified, filterByCategory: props.filterByCategory, filterByTransactionType: props.filterByTransactionType})
+  const filteredTransactions = filterTransactions({transactions: props.transactions, filterClassified: props.filterClassified, filterByCategory: props.filterByCategory, filterByTransactionType: props.filterByTransactionType, filterBySavingsTransfer: props.filterBySavingsTransfer})
   const sortedTransactions = sortTransactions({sortBy: props.sortBy, transactions: filteredTransactions});
 
     return (
@@ -27,6 +27,8 @@ function Transactions (props) {
             generateCategoryMapping = {props.generateCategoryMapping}
             importCategoryMappings= {props.importCategoryMappings}
             setFilterClassified = {props.setFilterClassified}
+            setSavingsTransferFilter={props.setSavingsTransferFilter}
+            filterBySavingsTransfer={props.filterBySavingsTransfer}
           />
           :
           <div>
@@ -41,7 +43,8 @@ function Transactions (props) {
           sortBy={props.sortBy}
           displayLimit={props.displayLimit}
           transactionLength={props.transactions.length}
-          deleteTransaction={props.deleteTransaction} 
+          deleteTransaction={props.deleteTransaction}
+          updateTransactionIsSaving={props.updateTransactionIsSaving}
           updateCategoryForMatchingItems={props.updateCategoryForMatchingItems}
           categoryList={categoryList}
           getPrediction={props.getPrediction}
@@ -73,7 +76,7 @@ function Transactions (props) {
   }
 
   // Apply transaction filters sequentially (if they are set)
-  function filterTransactions({transactions, filterClassified, filterByCategory, filterByTransactionType}) {
+  function filterTransactions({transactions, filterClassified, filterByCategory, filterByTransactionType, filterBySavingsTransfer}) {
     const filteredOutClassified = filterClassified ? transactions.filter((item) => {
       return item.category === "Undefined";
     }) : transactions;
@@ -94,7 +97,11 @@ function Transactions (props) {
         }
     }) : filtererdByCategoryTransactions;
 
-    return filteredByTypeTransactions;
+    const filteredBySavingTransfers = filterBySavingsTransfer ? filteredByTypeTransactions.filter((item) => {
+      return item.isSaving;
+    }) : filteredByTypeTransactions;
+
+    return filteredBySavingTransfers;
   }
 
   // Sort transactions according to date or amount criteria (ascending or descending)

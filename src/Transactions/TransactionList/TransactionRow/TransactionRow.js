@@ -3,6 +3,7 @@ import CategoryEditor from './CategoryEditor/CategoryEditor';
 import DeleteControl from './DeleteControl/DeleteControl';
 
 function TransactionRow (props) {
+
     return (
       <div className="transaction-row">
         <DeleteControl 
@@ -53,6 +54,20 @@ function TransactionRow (props) {
         				{props.transaction["Buchungstext"]}
         			</div>
         		</div>
+				<div className="transaction-data-body-item">
+					{
+						props.transaction["amount"] < 0
+						? <div>
+							<div className="transaction-data-body-label">
+								<b>Savings</b>
+							</div>
+							<div className="transaction-text">
+								<input type="checkbox" checked={props.transaction.isSaving} onChange={(e) => handleIsSavingChange(e, props.transaction.id)}/>
+							</div>
+						</div>
+						: null
+					}
+        		</div>
         	</div>
         </div>
         <div className="transaction-category-container">
@@ -65,7 +80,11 @@ function TransactionRow (props) {
             />
         </div>
       </div>
-    );
+	);
+	
+	function handleIsSavingChange(e, id) {
+		props.updateTransactionIsSaving(id, e.target.checked);
+	}
 }
 
 export default TransactionRow;

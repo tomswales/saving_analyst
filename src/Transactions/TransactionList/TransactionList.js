@@ -15,6 +15,7 @@ function TransactionList (props) {
           }
           {props.sortedTransactions.slice(0, props.displayLimit).map((transaction) => {
               return <TransactionRow 
+                updateTransactionIsSaving={props.updateTransactionIsSaving}
                 deleteTransaction={props.deleteTransaction} 
                 categoryList={props.categoryList} 
                 key={transaction.id} 

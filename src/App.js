@@ -29,7 +29,8 @@ function App(props) {
     filterClassified: false,
     filterByCategory: "",
     filterByTransactionType: "",
-    sortBy: "DATE_DESC"
+    sortBy: "DATE_DESC",
+    filterBySavingsTransfer: false
   });
 
   const [predict, setPredict] = useState(null);
@@ -38,10 +39,10 @@ function App(props) {
     try {
       const newState = retrieveStateFromLocalStorage();
       setState(newState);
+      createPredictiveModel(newState.transactions);
     } catch (e) {
       console.log("Error applying state from local storage to running application ", e.message);
     }
-    createPredictiveModel(state.transactions);
     // eslint-disable-next-line
   }, []);
 
@@ -75,6 +76,7 @@ function App(props) {
                     filterByCategory={filterState.filterByCategory}
                     filterClassified={filterState.filterClassified}
                     filterByTransactionType={filterState.filterByTransactionType}
+                    filterBySavingsTransfer={filterState.filterBySavingsTransfer}
                     currentBalance={state.currentBalance}
                     otherSavingsBalance={state.otherSavingsBalance}
                     savingGoal={state.savingGoal}
@@ -90,7 +92,9 @@ function App(props) {
                     setTransactionTypeFilter={setTransactionTypeFilter}
                     deleteTransaction={deleteTransaction}
                     updateCategoryForMatchingItems={updateCategoryForMatchingItems}
+                    updateTransactionIsSaving={updateTransactionIsSaving}
                     getPrediction={getPrediction}
+                    setSavingsTransferFilter={setSavingsTransferFilter}
                     />
       case "Reports":
         return <Reports 
@@ -219,7 +223,10 @@ function App(props) {
   // Generate a downloadable file with the mappings from transaction details to category
   function generateCategoryMapping() {
     try {
-      const export_data = "data:text/json," + encodeURIComponent(JSON.stringify(Array.from(generateCategoryMappingFromTransactionArray(state.transactions).entries())));
+      const export_data = "data:text/json," + encodeURIComponent(JSON.stringify({
+        mapping: Array.from(generateCategoryMappingFromTransactionArray(state.transactions).entries()),
+        savingsTransfers: generateSavingTransferMappingFromTransactionArray(state.transactions)
+      }));
       const export_time = new Date().toLocaleString();
       const downloadFileName = "data " + export_time + ".json";
       const aLink = downloadMappingRef.current;
@@ -236,8 +243,9 @@ function App(props) {
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
         const result = JSON.parse(fileReader.result);
-        const categoryMap = new Map(result);
-        applyCategoryMappingsToTransactions(categoryMap);
+        const categoryMap = new Map(result.mapping);
+        const savingsMap = new Map(result.savingsTransfers);
+        applyMappingsToTransactions(categoryMap, savingsMap);
     }
     try {
       fileReader.readAsText(file);
@@ -247,7 +255,7 @@ function App(props) {
   }
 
   // Apply categories to matching transactions
-  function applyCategoryMappingsToTransactions(categoryMap) {
+  function applyMappingsToTransactions(categoryMap, savingsMap) {
     if(categoryMap) {
       try {
         const newTransactions = state.transactions?.map((transaction) => {
@@ -259,9 +267,20 @@ function App(props) {
           }
         });
         if (newTransactions) {
-          const newState = {...state, transactions: newTransactions}
+          const newTransactionsWithSavings = newTransactions.map((newTransaction) => {
+            const date = newTransaction.bookingDate;
+            const amount = newTransaction.amount;
+            const refString = JSON.stringify(newTransaction.referenceString + "-" + date + "-" + amount);
+            if (savingsMap.get(refString) === true) {
+              return {...newTransaction, isSaving: true}
+            }
+            else {
+              return newTransaction;
+            }
+          });
+          const newState = {...state, transactions: newTransactionsWithSavings}
           setStateWithPersistence(newState);
-          createPredictiveModel(newTransactions);
+          createPredictiveModel(newTransactionsWithSavings);
         }
         else {
           throw new Error("transactions were undefined");
@@ -323,6 +342,24 @@ function App(props) {
   function setTransactionTypeFilter(newValue) {
     const newFilterState = {...filterState, filterByTransactionType: newValue}
     setFilterState(newFilterState);
+  }
+
+  function setSavingsTransferFilter(newValue) {
+    const newFilterState = {...filterState, filterBySavingsTransfer: newValue}
+    setFilterState(newFilterState);
+  }
+
+  function updateTransactionIsSaving(transactionId, isSavingValue) {
+    const newTransactions = state.transactions.map((t)=> {
+      if(t.id === transactionId) {
+        return {...t, isSaving: isSavingValue}
+      }
+      else {
+        return t;
+      }
+    });
+    const newState = {...state, transactions: newTransactions}
+    setStateWithPersistence(newState);
   }
 
   function updateCategoryForMatchingItems(transactionId, category) {
@@ -404,10 +441,17 @@ function processTransactionArray(transactions) {
     else {
       referenceString = t["Buchungstext"];
     }
-    const id = chance.string({ length: 25 });
+    const id = chance.guid();
     const bookingDate = moment.utc(t["Buchungstag"], "DD.MM.YY");
     const convertedAmount = t["Betrag"].replace(/,/g, '.');
-    const newT = {...t, id: id, amount: parseFloat(convertedAmount).toFixed(2), referenceString: referenceString, bookingDate: bookingDate.toDate(), category: "Undefined"};
+    const newT = {...t, 
+      id: id, 
+      amount: parseFloat(convertedAmount).toFixed(2), 
+      referenceString: referenceString, 
+      bookingDate: bookingDate.toDate(), 
+      category: "Undefined", 
+      isSaving: false
+    };
     return newT;
   })
 
@@ -438,6 +482,17 @@ function mapCategoriesToTransactions(categoryMap, transactions) {
     }
   });
   return newTransactions
+}
+
+function generateSavingTransferMappingFromTransactionArray(transactions) {
+  const filtered = transactions.filter(transaction => transaction.isSaving);
+
+  return filtered.map(result => {
+    const date = result.bookingDate;
+    const amount = result.amount;
+    const refString = JSON.stringify(result.referenceString + "-" + date + "-" + amount);
+    return [refString, result.isSaving]
+  })
 }
 
 /*

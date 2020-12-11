@@ -141,15 +141,17 @@ function Reports (props) {
   }
 }
 
-
-
 function calculateIncomeAndExpenditureByMonth(transactions) {
   const reducer = (accumulator, current) => {
     
       const month = moment(current.bookingDate).month();
       const year =  moment(current.bookingDate).year();
       const amount = parseFloat(current.amount);
-
+      const isSaving = current.isSaving;
+      const transferred = isSaving
+      ? round((0.00 - amount), 2)
+      : 0.00
+      let newMonthValue;
       if (accumulator.get(year)) {
         const accYear = accumulator.get(year);
         if (accYear.get(month)) {
@@ -158,27 +160,45 @@ function calculateIncomeAndExpenditureByMonth(transactions) {
           const previousExpenditure = previousMonth.expenditure;
           const previousTotal = previousMonth.total;
           const newTransactions = previousMonth.transactions.concat([current])
-          const newMonthValue = amount >= 0.00 
-            ? {...previousMonth, income: round((previousIncome + amount), 2), total: round((previousTotal + amount), 2), transactions: newTransactions} 
-            : {...previousMonth, expenditure: round((previousExpenditure + amount), 2), total: round((previousTotal + amount), 2), transactions: newTransactions};
+          if(isSaving){
+            const previousTransferred = previousMonth.transferred;
+            newMonthValue = {...previousMonth, transferred: round((previousTransferred + transferred), 2), transactions: newTransactions};
+          }
+          else if (amount >= 0.00) {
+            newMonthValue = {...previousMonth, income: round((previousIncome + amount), 2), total: round((previousTotal + amount), 2), transactions: newTransactions};
+          }
+          else {
+            newMonthValue = {...previousMonth, expenditure: round((previousExpenditure + amount), 2), total: round((previousTotal + amount), 2), transactions: newTransactions};
+          }
+          
           accYear.set(month, newMonthValue);
         }
         else {
-          const newMonthValue = amount >= 0.00
-          ? {year: year, month: month, income: amount, expenditure: 0.00, total: amount, transactions: [current]}
-          : {year: year, month: month, income: 0.00, expenditure: amount, total: amount, transactions: [current]}
+          if(isSaving){
+            newMonthValue = {year: year, month: month, income: 0.00, expenditure: 0.00, total: 0.00, transactions: [current], transferred: transferred};
+          }
+          else if(amount >= 0.00) {
+            newMonthValue = {year: year, month: month, income: amount, expenditure: 0.00, total: amount, transactions: [current], transferred: 0.00}
+          }
+          else {
+            newMonthValue = {year: year, month: month, income: 0.00, expenditure: amount, total: amount, transactions: [current], transferred: 0.00}
+          }
           accumulator.get(year).set(month, newMonthValue);
         }
       }
       else {
-        const newMonthValue = amount >= 0.00
-        ? {year: year, month: month, income: amount, expenditure: 0.00, total: amount, transactions: [current]}
-        : {year: year, month: month, income: 0.00, expenditure: amount, total: amount, transactions: [current]}
-
+        if(isSaving){
+          newMonthValue = {year: year, month: month, income: 0.00, expenditure: 0.00, total: 0.00, transactions: [current], transferred: transferred};
+        }
+        else if(amount >= 0.00) {
+          newMonthValue = {year: year, month: month, income: amount, expenditure: 0.00, total: amount, transactions: [current], transferred: 0.00}
+        }
+        else {
+          newMonthValue = {year: year, month: month, income: 0.00, expenditure: amount, total: amount, transactions: [current], transferred: 0.00}
+        }
         accumulator.set(year, new Map());
         accumulator.get(year).set(month, newMonthValue);
       }
-
       return accumulator
   }
 
@@ -208,9 +228,14 @@ function calculateSavingTrajectoryByMonth(array, currentBalance) {
     return accumulator + current.total;
   }
 
-  const totalCumulativeSavings = array.reduce(totalSavingsReducer, 0.00);
+  const transferredReducer = (accumulator, current) => {
+    return accumulator + current.transferred
+  }
 
-  const floatValue = currentBalance - totalCumulativeSavings;
+  const totalCumulativeSavings = array.reduce(totalSavingsReducer, 0.00);
+  const totalTransferred = array.reduce(transferredReducer, 0.0);
+
+  const floatValue = round((currentBalance - totalCumulativeSavings + totalTransferred), 2);
 
   const reducer = (accumulator, current, index) => {
     if (accumulator.length === 0) {

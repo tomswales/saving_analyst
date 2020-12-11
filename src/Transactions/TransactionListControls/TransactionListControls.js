@@ -38,6 +38,10 @@ function TransactionListControls (props) {
                       <option value="Income">Income</option>
                   </select>
                 </div>
+                <div className="filter-control">
+                  <label htmlFor="">Filter by savings transfer</label>
+                  <input type="checkbox" checked={props.filterBySavingsTransfer} onChange={(e) => handleFilterSavingsTransferChange(e)}/>
+                </div>
               </form>
             </div>
           </div>
@@ -75,6 +79,10 @@ function TransactionListControls (props) {
 
   function handleFilterTransactionTypeChange(event) {
     props.setTransactionTypeFilter(event.target.value);
+  }
+
+  function handleFilterSavingsTransferChange(event) {
+    props.setSavingsTransferFilter(event.target.checked);
   }
 
   function handleFormSubmit(event) {
