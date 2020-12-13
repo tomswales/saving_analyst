@@ -273,7 +273,7 @@ function convertCategoriesToMap(categories) {
 function calculateCategoryExpenditureTotals(transactions, categories) {
   const reducer = (accumulator, current) => {
     if (accumulator.has(current.category)) {
-      if(current.amount < 0) {
+      if(current.amount < 0 && !current.isSaving) {
         const oldTotal = parseFloat(accumulator.get(current.category));
         const newTotal = oldTotal + parseFloat(current.amount);
         accumulator.set(current.category, newTotal);
