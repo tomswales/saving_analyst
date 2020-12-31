@@ -211,10 +211,15 @@ function summariseMonthlyData(monthData, currentBalance, savingGoal) {
     return accumulator + current.total
   }
 
+  const transferredReducer = (accumulator, current, index) => {
+    return accumulator + current.transferred
+  }
+
   const totalSaving = monthData.reduce(savingReducer, 0.0).toFixed(2);
+  const totalTransferred = monthData.reduce(transferredReducer, 0.0);
   const totalMonths = monthData.length;
   const averageSaving = monthData.length > 0 ? (totalSaving / totalMonths).toFixed(2) : 0.0;
-  const percentSaved = savingGoal && currentBalance && savingGoal > 0.0 ? ((currentBalance / savingGoal) * 100).toFixed(1) : 0.0;
+  const percentSaved = savingGoal && currentBalance && savingGoal > 0.0 ? (((currentBalance + totalTransferred) / savingGoal) * 100).toFixed(1) : 0.0;
   return {totalSaving: totalSaving, averageSaving: averageSaving, percentSaved: percentSaved};
 } 
 
