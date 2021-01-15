@@ -82,7 +82,7 @@ function Reports (props) {
 
               <SavingTrajectoryChart 
                 data={monthData} 
-                currentBalance={currentSavings}
+                currentBalance={currentSavings + periodSummary.totalTransferred}
                 savingGoal={savingGoal}
                 interestRate={interestRate}
               />
@@ -220,7 +220,7 @@ function summariseMonthlyData(monthData, currentBalance, savingGoal) {
   const totalMonths = monthData.length;
   const averageSaving = monthData.length > 0 ? (totalSaving / totalMonths).toFixed(2) : 0.0;
   const percentSaved = savingGoal && currentBalance && savingGoal > 0.0 ? (((currentBalance + totalTransferred) / savingGoal) * 100).toFixed(1) : 0.0;
-  return {totalSaving: totalSaving, averageSaving: averageSaving, percentSaved: percentSaved};
+  return {totalSaving: totalSaving, averageSaving: averageSaving, percentSaved: percentSaved, totalTransferred: totalTransferred};
 } 
 
 function round(value, decimals) {
