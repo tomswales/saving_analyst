@@ -5,7 +5,7 @@ self.addEventListener('install', function(event) {
       caches.open("saving_analyst").then(function(cache) {
         return cache.addAll(
           [
-            './index.html',
+            './',
             './serviceWorker.js',
             'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/webfonts/fa-regular-400.woff2',
             './styles.css',
