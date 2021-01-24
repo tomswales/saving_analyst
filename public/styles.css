@@ -187,12 +187,27 @@ body {
     margin-right: 2%;
 }
 
+@media screen and (max-width: 400px) {
+    .transaction-list-controls-container {
+        max-width: auto;
+        box-sizing: border-box;
+    }
+    
+    .transaction-list-controls {
+        margin: 0;
+    }
+
+    .transaction-control-button {
+        max-width: 280px;
+    }
+}
+
 input[type=range] {
     width: 165px;
 }
 
  .transaction-control-button {
-    max-width: 250px;
+    width: 300px;
     margin-bottom: 5px;
  }
 
@@ -284,13 +299,15 @@ input[type=range] {
 }
 
 .category-name {
-    height: 30px;
+    min-height: 30px;
+    margin-bottom: 0.5em;
     display: flex;
     width: 100%;
     font-weight: 600;
     font-size: 1.2em;
     justify-content: center;
     align-items: center;
+    text-align: center;
 }
 
 .category-editor-button-spacer {
