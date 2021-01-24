@@ -3,7 +3,7 @@
   <head>
     <script>
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/saving_analyst/serviceWorker.js')
+        navigator.serviceWorker.register('%PUBLIC_URL%/serviceWorker.js')
         .then(function(registration) {
           console.log('Registration successful, scope is:', registration.scope);
         })
