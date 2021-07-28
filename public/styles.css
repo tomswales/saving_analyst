@@ -1,7 +1,7 @@
 
 @font-face {
     font-family: 'Goldman Sans';
-    src:  url('./font.woff2') format('woff2')
+    src:  url('/font.woff2') format('woff2')
   }
 
 
@@ -33,7 +33,7 @@ body {
 }
 
 html {
-     font-family: 'Goldman Sans' sans-serif !important;
+     font-family: 'Goldman Sans', sans-serif !important;
 }
 
 /*Global design settings*/
