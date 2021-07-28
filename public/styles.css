@@ -33,7 +33,7 @@ body {
 }
 
 html {
-     font-family: 'Goldman Sans' sans-serif d!important;
+     font-family: 'Goldman Sans' sans-serif !important;
 }
 
 /*Global design settings*/
