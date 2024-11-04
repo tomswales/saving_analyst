@@ -5,8 +5,31 @@ import * as d3 from 'd3';
 import moment from 'moment';
 import Chance from 'chance';
 import Reports from './Reports/Reports';
+import { openDB } from 'idb';
 
 function App(props) {
+
+  const DB_NAME = "saving_analyst";
+  const TABLE_NAME = "transactions";
+
+  const DB = async () => await openDB(DB_NAME, 1, {
+      upgrade(db) {
+          db.createObjectStore(TABLE_NAME);
+      }
+  });
+
+  const Storage = {
+    getItem: async (key) =>
+        (await DB()).get(TABLE_NAME, key),
+    setItem: async (key, value) =>
+        (await DB()).put(TABLE_NAME, value, key),
+    del: async (key) =>
+        (await DB()).delete(TABLE_NAME, key),
+    clear: async (key) =>
+        (await DB()).clear(TABLE_NAME),
+    keys: async () =>
+        (await DB()).getAllKeys(TABLE_NAME)
+  };
   
   const downloadMappingRef = useRef(null);
 
@@ -37,9 +60,12 @@ function App(props) {
 
   useEffect(() => {
     try {
-      const newState = retrieveStateFromLocalStorage();
-      setState(newState);
-      createPredictiveModel(newState.transactions);
+      async function getLocalData() {
+        const newState = await retrieveStateFromLocalStorage();
+        setState(newState);
+        createPredictiveModel(newState.transactions);
+      }
+      getLocalData();
     } catch (e) {
       console.log("Error applying state from local storage to running application ", e.message);
     }
@@ -115,9 +141,11 @@ function App(props) {
   }
 
   // Get state from local storage if it exists or instantiate with empty defaults
-  function retrieveStateFromLocalStorage() {
+  async function retrieveStateFromLocalStorage() {
     try {
-      const savedState = window.localStorage.getItem("savedState");
+      console.log("Here")
+      const savedState = await Storage.getItem("savedState");
+      console.log("Saved state", savedState)
       const parsedSavedState = savedState ? JSON.parse(savedState) : {};
       const newState = {
           ...state,
@@ -152,7 +180,7 @@ function App(props) {
   }
 
   // Save state to local storage
-  function saveStateToLocalStorage(appState) {
+  async function saveStateToLocalStorage(appState) {
     try {
       const saveState = {
           transactions: appState.transactions, 
@@ -162,7 +190,7 @@ function App(props) {
           interestRate: appState.interestRate,
           storedCategoryMappings: Array.from(appState.storedCategoryMappings.entries())
         }
-      window.localStorage.setItem("savedState", JSON.stringify(saveState));
+      return await Storage.setItem("savedState", JSON.stringify(saveState));
     } catch (e) {
       console.log("Error saving state to local storage", e.message);
     }
