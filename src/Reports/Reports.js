@@ -5,6 +5,8 @@ import ExpenditureByCategoryChart from './ExpenditureByCategoryChart/Expenditure
 import SavingTrajectoryChart from './SavingTrajectoryChart/SavingTrajectoryChart';
 import IncomeByCategoryChart from './IncomeByCategoryChart/IncomeByCategoryChart';
 import moment from 'moment';
+import OverallExpenditureByCategoryChart from './OverallExpenditureByCategoryChart/OverallExpenditureByCategoryChart';
+import OverallIncomeByCategoryChart from './OverallIncomeByCategoryChart/OverallIncomeByCategoryChart';
 
 function Reports (props) {
 
@@ -24,7 +26,16 @@ function Reports (props) {
     );
     const categories = useMemo(
       () => extractTransactionCategories(props.transactions), [props.transactions]
-    );
+    ); 
+
+    const overallExpenditureByCategory = useMemo(
+      () => generateOverallExpenditureByCategoryDatasets(props.transactions, categories), [props.transactions, categories]
+    )
+
+    const overallIncomeByCategory = useMemo(
+      () => generateOverallIncomeByCategoryDatasets(props.transactions, categories), [props.transactions, categories]
+    )
+
     const categoryExpenditureByMonth = useMemo(
       () => generateMonthlyCategoryDatasets(monthData, categories), [monthData, categories]
     );
@@ -86,7 +97,9 @@ function Reports (props) {
                 savingGoal={savingGoal}
                 interestRate={interestRate}
               />
+              <OverallExpenditureByCategoryChart data={overallExpenditureByCategory}></OverallExpenditureByCategoryChart>
               <ExpenditureByCategoryChart data={categoryExpenditureByMonth}/>
+              <OverallIncomeByCategoryChart data={overallIncomeByCategory}/>
               <IncomeByCategoryChart data={categoryIncomeByMonth}/>
             </div>
 
@@ -320,6 +333,23 @@ function generateMonthlyCategoryDatasets (transactionsByMonth, categories) {
   return {months: months, datasets: filteredCategoryDatasets.sort((a, b) => {
     return b.total - a.total;
   })};
+}
+
+function generateOverallExpenditureByCategoryDatasets(transactions, categories) {
+
+  const totals = Array.from(calculateCategoryExpenditureTotals(transactions, categories).entries())
+  .sort((a, b) => {return a[1] - b[1]});
+
+  return totals;
+}
+
+function generateOverallIncomeByCategoryDatasets(transactions, categories) {
+
+  const totals = Array.from(calculateCategoryIncomeTotals(transactions, categories).entries())
+  .filter(item => item[1] > 0)
+  .sort((a, b) => {return b[1] - a[1]});
+
+  return totals;
 }
 
 function calculateCategoryIncomeTotals(transactions, categories) {

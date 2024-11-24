@@ -145,7 +145,6 @@ function App(props) {
     try {
       console.log("Here")
       const savedState = await Storage.getItem("savedState");
-      console.log("Saved state", savedState)
       const parsedSavedState = savedState ? JSON.parse(savedState) : {};
       const newState = {
           ...state,

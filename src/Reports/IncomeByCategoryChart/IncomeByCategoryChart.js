@@ -49,7 +49,7 @@ function IncomeByCategoryChart (props) {
   });
 
   return    <div className="chart-panel">
-              <h4>Income by category</h4>
+              <h4>Monthly income by category</h4>
               <div className="chart-container double">
                 <canvas ref={incomeByCategoryCanvas}></canvas>
               </div>
