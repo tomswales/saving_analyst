@@ -443,7 +443,8 @@ input[type=range] {
 }
 
 .chart-container.double {
-    height: 600px;
+    height: auto;
+    min-height: 600px;
 }
 
 .stat-container {
